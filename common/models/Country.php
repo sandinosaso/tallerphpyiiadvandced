@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use yii\helpers\ArrayHelper;
+
 use Yii;
 
 /**
@@ -46,10 +48,14 @@ class Country extends \yii\db\ActiveRecord
     }
 
     public function scenarios() {
-        return [
-            self::SCENARIO_CREATE => ['name', 'population', 'code', 'flag_img'],
-            self::SCENARIO_UPDATE => ['name', 'population', 'code', 'flag_img'],
-        ];
+        $merged_scenarios = ArrayHelper::merge(
+            parent::scenarios(),
+            [
+                self::SCENARIO_CREATE => ['name', 'population', 'code', 'flag_img'],
+                self::SCENARIO_UPDATE => ['name', 'population', 'code', 'flag_img'],
+            ]);
+
+        return $merged_scenarios;
     }
 
     /**
