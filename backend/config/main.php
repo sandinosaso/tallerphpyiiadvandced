@@ -46,6 +46,13 @@ return [
             ],
         ],
 
+        'AmazonS3' => [
+          'class' => 'backend\components\AmazonS3',
+          'key' => 'XXXXXXXXXXXXX',
+          'secret' => 'XXXXXXXXXXXX',
+          'bucketName' => 'yii2advancedappbucket',
+         ],
+
         // 'view' => [
         //       'theme' => [
         //           'pathMap' => [

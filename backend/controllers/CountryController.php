@@ -8,6 +8,7 @@ use common\models\CountrySearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
  * CountryController implements the CRUD actions for Country model.
@@ -20,6 +21,17 @@ class CountryController extends Controller
     public function behaviors()
     {
         return [
+          'access' => [
+            'class' => AccessControl::className(),
+            'only' => ['create', 'update', 'delete'],
+            'rules' => [
+                [
+                    'actions' => ['create', 'update', 'delete'],
+                    'allow' => true,
+                    'roles' => ['@'],
+                ],
+            ],
+        ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -86,7 +98,29 @@ class CountryController extends Controller
         $model = $this->findModel($id);
         $model->setScenario('update');
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        $saveOk = false;
+
+        // HIDDEN UPLOAD TO FILE - HERE
+        // TODO -> MOVE ME TO ANOTHER PLACE
+        $fileToUpload = '/Users/sandino/Documents/www/tallerphpyiiadvanced/frontend/web/favicon.ico';        
+        $result = Yii::$app->AmazonS3->uploadImage($fileToUpload);
+        // TODO -> MOVE ME TO ANOTHER PLACE
+
+        if ($model->load(Yii::$app->request->post())) {
+          $dirty_attributes = $model->getDirtyAttributes();
+          if (isset($dirty_attributes['flag_img'])) {
+            if(\Yii::$app->user->can('updateCountryBandera')) {
+              // Update
+              $saveOk = $model->save();
+            } else {
+              $model->addError('flag_img', 'No tienes permiso para modificar la flag');
+            }
+          } else {
+            $saveOk = $model->save();
+          }
+        }
+
+        if ($saveOk) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('update', [
